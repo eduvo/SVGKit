@@ -897,56 +897,22 @@ static NSMutableDictionary *NSDictionaryFromLibxmlAttributes (const xmlChar **at
 		SVGKitLogWarn(@"[%@] WARNING: asked to convert an empty CSS string into a CSS dictionary; returning empty dictionary", [self class] );
 		return [NSDictionary dictionary];
 	}
-	
-	NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
-	
-	const char *cstr = [styleAttribute.value UTF8String];
-	size_t len = strlen(cstr);
-	
-	char name[MAX_NAME];
-	bzero(name, MAX_NAME);
-	
-	char accum[MAX_ACCUM];
-	bzero(accum, MAX_ACCUM);
-	
-	size_t accumIdx = 0;
-	
-	for (size_t n = 0; n <= len; n++) {
-		char c = cstr[n];
-		
-		if (c == '\n' || c == '\t' || c == ' ') {
-			continue;
-		}
-		
-		if (c == ':') {
-			strcpy(name, accum);
-			name[accumIdx] = '\0';
-			
-			bzero(accum, MAX_ACCUM);
-			accumIdx = 0;
-			
-			continue;
-		}
-		else if (c == ';' || c == '\0') {
-			accum[accumIdx] = '\0';
-			
-			Attr* newAttribute = [[Attr alloc] initWithNamespace:styleAttribute.namespaceURI qualifiedName:[NSString stringWithUTF8String:name] value:[NSString stringWithUTF8String:accum]];
-			
-			[dict setObject:newAttribute
-					 forKey:newAttribute.localName];
-			
-			bzero(name, MAX_NAME);
-			
-			bzero(accum, MAX_ACCUM);
-			accumIdx = 0;
-			
-			continue;
-		}
-		
-		accum[accumIdx++] = c;
-	}
-	
-	return dict;
+
+    NSMutableDictionary *dict = [[NSMutableDictionary alloc] init];
+    NSCharacterSet* trimChars = [NSCharacterSet whitespaceAndNewlineCharacterSet];
+
+    NSArray *properties = [styleAttribute.value componentsSeparatedByString:@";"];
+
+    for (NSString *property in properties) {
+        NSArray *keyValuePair = [property componentsSeparatedByString:@":"];
+        if (keyValuePair.count == 2) {
+            NSString *key = [keyValuePair[0] stringByTrimmingCharactersInSet:trimChars];
+            NSString *value = [keyValuePair[1] stringByTrimmingCharactersInSet:trimChars];
+            [dict setObject:value forKey:key];
+        }
+    }
+
+    return [dict copy];
 }
 
 @end
