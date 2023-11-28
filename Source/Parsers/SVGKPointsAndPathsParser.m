@@ -307,19 +307,27 @@ static inline CGPoint SVGCurveReflectedControlPoint(SVGCurve prevCurve)
 + (CGPoint) readFlags:(NSScanner*)scanner {
     CGPoint p;
     unsigned int flag;
-    NSUInteger oldLocation = scanner.scanLocation;
 
-    if (![scanner scanHexInt:&flag]) {
-        NSAssert(FALSE, @"invalid flags");
-    }
+    NSString *flagString = [scanner.string substringWithRange: NSMakeRange(scanner.scanLocation, scanner.scanLocation + 2)];
+    NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", @"^[01]{2}$"];
 
-    if (scanner.scanLocation - oldLocation > 1) {
+    if ([predicate evaluateWithObject:flagString]) {
+        // binary encoded
+        NSScanner *flagScanner = [[NSScanner alloc] initWithString: flagString];
+        if (![flagScanner scanHexInt:&flag]) {
+            NSAssert(FALSE, @"invalid flags");
+        }
         p.x = (flag & 0xF0) >> 4;
         p.y = (flag & 0xF);
     } else {
+        // individual flags
+        if (![scanner scanHexInt:&flag]) {
+            NSAssert(FALSE, @"invalid flags");
+        }
         p.x = flag;
-        [SVGKPointsAndPathsParser readCommaAndWhitespace:scanner];
 
+        [SVGKPointsAndPathsParser readCommaAndWhitespace:scanner];
+        
         if (![scanner scanHexInt:&flag]) {
             NSAssert(FALSE, @"invalid flags");
         }
