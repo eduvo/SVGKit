@@ -308,7 +308,7 @@ static inline CGPoint SVGCurveReflectedControlPoint(SVGCurve prevCurve)
     CGPoint p;
     unsigned int flag;
 
-    NSString *flagString = [scanner.string substringWithRange: NSMakeRange(scanner.scanLocation, scanner.scanLocation + 2)];
+    NSString *flagString = [scanner.string substringWithRange: NSMakeRange(scanner.scanLocation + 1, 2)];
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", @"^[01]{2}$"];
 
     if ([predicate evaluateWithObject:flagString]) {
