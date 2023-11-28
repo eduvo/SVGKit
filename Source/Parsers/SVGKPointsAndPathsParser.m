@@ -312,6 +312,8 @@ static inline CGPoint SVGCurveReflectedControlPoint(SVGCurve prevCurve)
     NSPredicate *predicate = [NSPredicate predicateWithFormat:@"SELF MATCHES %@", @"^[01]{2}$"];
 
     if ([predicate evaluateWithObject:flagString]) {
+        [scanner setScanLocation:(scanner.scanLocation + 2)];
+
         // binary encoded
         NSScanner *flagScanner = [[NSScanner alloc] initWithString: flagString];
         if (![flagScanner scanHexInt:&flag]) {
