@@ -304,16 +304,36 @@ static inline CGPoint SVGCurveReflectedControlPoint(SVGCurve prevCurve)
  coordinate comma-wsp? coordinate
  */
 
++ (CGPoint) readFlags:(NSScanner*)scanner {
+    CGPoint p;
+    unsigned int flag;
+    NSUInteger oldLocation = scanner.scanLocation;
+
+    if (![scanner scanHexInt:&flag]) {
+        NSAssert(FALSE, @"invalid flags");
+    }
+
+    if (scanner.scanLocation - oldLocation > 1) {
+        p.x = (flag & 0xF0) >> 4;
+        p.y = (flag & 0xF);
+    } else {
+        p.x = flag;
+        [SVGKPointsAndPathsParser readCommaAndWhitespace:scanner];
+
+        if (![scanner scanHexInt:&flag]) {
+            NSAssert(FALSE, @"invalid flags");
+        }
+        p.y = flag;
+    }
+    return p;
+}
+
 + (CGPoint) readCoordinatePair:(NSScanner*)scanner
 {
 	CGPoint p;
 	[SVGKPointsAndPathsParser readCoordinate:scanner intoFloat:&p.x];
-    if (p.x == 0 && scanner.isAtEnd) {
-        p.y = p.x;
-    } else {
-        [SVGKPointsAndPathsParser readCommaAndWhitespace:scanner];
-        [SVGKPointsAndPathsParser readCoordinate:scanner intoFloat:&p.y];
-    }
+    [SVGKPointsAndPathsParser readCommaAndWhitespace:scanner];
+    [SVGKPointsAndPathsParser readCoordinate:scanner intoFloat:&p.y];
 
     return p;
 }
@@ -836,8 +856,8 @@ static inline CGPoint SVGCurveReflectedControlPoint(SVGCurve prevCurve)
     
     [SVGKPointsAndPathsParser readCommaAndWhitespace:scanner];
 	
-	CGPoint flags = [SVGKPointsAndPathsParser readCoordinatePair:scanner];
-	
+	CGPoint flags = [SVGKPointsAndPathsParser readFlags:scanner];
+
 	BOOL largeArcFlag = flags.x != 0.;
 	BOOL sweepFlag = flags.y != 0.;
     
