@@ -308,9 +308,13 @@ static inline CGPoint SVGCurveReflectedControlPoint(SVGCurve prevCurve)
 {
 	CGPoint p;
 	[SVGKPointsAndPathsParser readCoordinate:scanner intoFloat:&p.x];
-    [SVGKPointsAndPathsParser readCommaAndWhitespace:scanner];
-    [SVGKPointsAndPathsParser readCoordinate:scanner intoFloat:&p.y];
-    
+    if (p.x == 0 && scanner.isAtEnd) {
+        p.y = p.x;
+    } else {
+        [SVGKPointsAndPathsParser readCommaAndWhitespace:scanner];
+        [SVGKPointsAndPathsParser readCoordinate:scanner intoFloat:&p.y];
+    }
+
     return p;
 }
 
