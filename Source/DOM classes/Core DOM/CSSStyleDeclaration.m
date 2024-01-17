@@ -69,12 +69,16 @@
 
 -(NSString*) getPropertyValue:(NSString*) propertyName
 {
-	CSSValue* v = [self getPropertyCSSValue:propertyName];
-	
-	if( v == nil )
-		return nil;
-	else
-		return v.cssText;
+	id value = [self getPropertyCSSValue:propertyName];
+
+    if ([value isKindOfClass:[CSSValue class]]) {
+        return [value cssText];
+    } else if ([value isKindOfClass:[NSString class]]) {
+        return value; // Return the string directly
+    } else {
+        // Handle other cases if needed
+        return nil; // or any other appropriate action
+    }
 }
 
 -(CSSValue*) getPropertyCSSValue:(NSString*) propertyName
